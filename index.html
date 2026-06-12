@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minecraft Kvíz 💎</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&family=Nunito:wght@600;700;800&display=swap');
+
+  :root {
+    --dirt: #8B5E3C;
+    --grass: #5D9B3A;
+    --stone: #8A8A8A;
+    --diamond: #4AECF5;
+    --diamond-dark: #1BC8D4;
+    --gold: #FFD700;
+    --sky: #87CEEB;
+    --night: #1a2a4a;
+    --green: #3CB371;
+    --red: #E74C3C;
+    --yellow: #F9CA24;
+    --wood: #966F33;
+    --emerald: #50C878;
+    --purple: #9B59B6;
+    --white: #F0F0F0;
+    --bg: #1a3a5c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Pixel sky background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(180deg, #0d1b35 0%, #1a3a5c 40%, #2a5298 70%, #3a7dc0 100%);
+    z-index: -2;
+  }
+
+  /* Stars */
+  .stars {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 2s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.3; transform: scale(1); }
+    to   { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* Floating blocks */
+  .floating-blocks {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  }
+  .block {
+    position: absolute;
+    width: 36px; height: 36px;
+    opacity: 0.18;
+    animation: floatUp linear infinite;
+    image-rendering: pixelated;
+  }
+  @keyframes floatUp {
+    from { transform: translateY(110vh) rotate(0deg); }
+    to   { transform: translateY(-10vh) rotate(360deg); }
+  }
+
+  /* Layout */
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 28px 20px 20px;
+  }
+  .header h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 4vw, 22px);
+    color: var(--diamond);
+    text-shadow:
+      3px 3px 0 #0a7a84,
+      -1px -1px 0 #0a7a84,
+      0 0 20px var(--diamond),
+      0 0 40px #4AECF566;
+    line-height: 1.7;
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(16px, 4vw, 22px);
+    color: var(--gold);
+    margin-top: 8px;
+    text-shadow: 2px 2px 0 #8B6914;
+  }
+  .header .deco {
+    font-size: clamp(24px, 6vw, 40px);
+    margin-bottom: 6px;
+    display: block;
+    animation: bounce 1.5s infinite;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  /* Card */
+  .card {
+    background: rgba(15,30,60,0.85);
+    border: 4px solid var(--diamond);
+    border-radius: 16px;
+    padding: 28px 24px;
+    box-shadow:
+      0 0 30px #4AECF540,
+      inset 0 0 20px rgba(74,236,245,0.05);
+    backdrop-filter: blur(6px);
+    margin-bottom: 20px;
+  }
+
+  /* Progress bar */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .progress-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--diamond);
+    white-space: nowrap;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 14px;
+    background: #1a2a4a;
+    border-radius: 7px;
+    border: 2px solid var(--diamond-dark);
+    overflow: hidden;
+    min-width: 100px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--diamond-dark), var(--diamond));
+    border-radius: 7px;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 8px var(--diamond);
+  }
+
+  /* Lives */
+  .lives {
+    display: flex; gap: 8px;
+    align-items: center;
+  }
+  .heart {
+    font-size: 26px;
+    transition: transform 0.3s, filter 0.3s;
+  }
+  .heart.lost {
+    filter: grayscale(1) opacity(0.3);
+    transform: scale(0.85);
+  }
+  @keyframes heartbeat {
+    0%,100% { transform: scale(1); }
+    30%      { transform: scale(1.4); }
+    60%      { transform: scale(1.1); }
+  }
+
+  /* Difficulty badge */
+  .diff-badge {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .diff-easy   { background: #1a4a1a; color: var(--emerald); border: 2px solid var(--emerald); }
+  .diff-medium { background: #4a3a0a; color: var(--gold);    border: 2px solid var(--gold); }
+  .diff-hard   { background: #4a0a0a; color: #FF6B6B;        border: 2px solid #FF6B6B; }
+
+  /* Prize indicator */
+  .prize-row {
+    display: flex; justify-content: center; gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .prize-gem {
+    font-size: 20px;
+    transition: all 0.3s;
+    filter: grayscale(0.7) opacity(0.4);
+  }
+  .prize-gem.active {
+    filter: none;
+    transform: scale(1.2);
+    animation: gemGlow 1s infinite alternate;
+  }
+  .prize-gem.earned {
+    filter: none;
+    transform: scale(1.1);
+  }
+  @keyframes gemGlow {
+    from { filter: brightness(1); }
+    to   { filter: brightness(1.5) drop-shadow(0 0 6px var(--diamond)); }
+  }
+
+  /* Question */
+  .question-num {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #aaa;
+    margin-bottom: 8px;
+  }
+  .question-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(18px, 5vw, 26px);
+    color: var(--white);
+    margin-bottom: 22px;
+    line-height: 1.5;
+    text-shadow: 1px 1px 4px #000;
+  }
+
+  /* Answers */
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .answers { grid-template-columns: 1fr; }
+  }
+
+  .answer-btn {
+    position: relative;
+    padding: 14px 12px;
+    border: 3px solid;
+    border-radius: 12px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(14px, 3.5vw, 18px);
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    line-height: 1.3;
+    overflow: hidden;
+    background: transparent;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .answer-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .answer-btn:hover:not(:disabled)::before { opacity: 1; }
+  .answer-btn:active:not(:disabled) { transform: scale(0.97); }
+
+  .ans-a { border-color: #4A90E2; color: #7DC0FF; }
+  .ans-a::before { background: #4A90E215; }
+  .ans-a:hover:not(:disabled) { background: #4A90E220; box-shadow: 0 0 12px #4A90E240; }
+
+  .ans-b { border-color: #E74C3C; color: #FF9090; }
+  .ans-b::before { background: #E74C3C15; }
+  .ans-b:hover:not(:disabled) { background: #E74C3C20; box-shadow: 0 0 12px #E74C3C40; }
+
+  .ans-c { border-color: #F9CA24; color: #FFE77A; }
+  .ans-c::before { background: #F9CA2415; }
+  .ans-c:hover:not(:disabled) { background: #F9CA2420; box-shadow: 0 0 12px #F9CA2440; }
+
+  .ans-d { border-color: #6C5CE7; color: #B8A9FF; }
+  .ans-d::before { background: #6C5CE715; }
+  .ans-d:hover:not(:disabled) { background: #6C5CE720; box-shadow: 0 0 12px #6C5CE740; }
+
+  .answer-btn .letter {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .ans-a .letter { background: #4A90E230; border: 1px solid #4A90E2; color: #7DC0FF; }
+  .ans-b .letter { background: #E74C3C30; border: 1px solid #E74C3C; color: #FF9090; }
+  .ans-c .letter { background: #F9CA2430; border: 1px solid #F9CA24; color: #FFE77A; }
+  .ans-d .letter { background: #6C5CE730; border: 1px solid #6C5CE7; color: #B8A9FF; }
+
+  .answer-btn.correct {
+    background: #1a4a1a !important;
+    border-color: var(--emerald) !important;
+    color: var(--emerald) !important;
+    animation: correctFlash 0.5s ease;
+  }
+  .answer-btn.wrong {
+    background: #4a1a1a !important;
+    border-color: var(--red) !important;
+    color: var(--red) !important;
+    animation: wrongShake 0.4s ease;
+  }
+  @keyframes correctFlash {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  @keyframes wrongShake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    60%      { transform: translateX(6px); }
+  }
+
+  /* Feedback */
+  .feedback {
+    text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(18px, 5vw, 26px);
+    margin-top: 18px;
+    min-height: 40px;
+    transition: all 0.3s;
+  }
+  .feedback.correct { color: var(--emerald); text-shadow: 0 0 12px #50C87880; }
+  .feedback.wrong   { color: #FF7070;       text-shadow: 0 0 12px #FF707080; }
+
+  /* Next button */
+  .next-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 14px 40px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    background: linear-gradient(135deg, var(--diamond-dark), var(--diamond));
+    color: #0d1b35;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #0a7a84, 0 0 20px #4AECF540;
+    transition: all 0.15s;
+    display: none;
+  }
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #0a7a84, 0 0 30px #4AECF560; }
+  .next-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0a7a84; }
+  .next-btn.visible { display: block; }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Start screen */
+  .start-content { text-align: center; }
+  .start-content p {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(15px, 4vw, 19px);
+    color: #BDE0FF;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin: 22px 0;
+  }
+  .info-item {
+    background: rgba(74,236,245,0.07);
+    border: 2px solid rgba(74,236,245,0.25);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .info-item .icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .info-item .label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    color: var(--white);
+    display: block;
+  }
+  .info-item .value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--diamond);
+    display: block;
+    margin-top: 4px;
+  }
+
+  .big-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 3vw, 16px);
+    padding: 18px 40px;
+    background: linear-gradient(135deg, #1BC8D4, #4AECF5);
+    color: #0d1b35;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #0a7a84, 0 0 30px #4AECF550;
+    transition: all 0.15s;
+    margin: 10px auto;
+    display: inline-block;
+  }
+  .big-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #0a7a84, 0 0 40px #4AECF570; }
+  .big-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #0a7a84; }
+
+  /* End screen */
+  .end-content { text-align: center; }
+  .result-big {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 4vw, 20px);
+    color: var(--diamond);
+    text-shadow: 0 0 20px var(--diamond);
+    margin-bottom: 10px;
+    line-height: 1.7;
+  }
+  .diamonds-display {
+    font-size: clamp(40px, 12vw, 70px);
+    margin: 16px 0;
+    animation: bigBounce 1s ease infinite;
+  }
+  @keyframes bigBounce {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.1) rotate(-5deg); }
+  }
+  .praise {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(20px, 5vw, 30px);
+    color: var(--gold);
+    text-shadow: 2px 2px 0 #8B6914;
+    margin: 14px 0;
+    line-height: 1.4;
+  }
+  .diamond-count {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 4vw, 22px);
+    color: var(--emerald);
+    margin: 14px 0;
+    text-shadow: 0 0 16px var(--emerald);
+  }
+  .confetti-area {
+    position: fixed; inset: 0; pointer-events: none; z-index: 100;
+    overflow: hidden;
+  }
+  .conf {
+    position: absolute;
+    width: 10px; height: 10px;
+    top: -20px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Pixel creeper deco */
+  .creeper-deco {
+    font-size: clamp(36px, 10vw, 60px);
+    display: block;
+    margin: 10px auto;
+    animation: creepBounce 0.8s infinite alternate;
+  }
+  @keyframes creepBounce {
+    from { transform: translateY(0) rotate(-3deg); }
+    to   { transform: translateY(-8px) rotate(3deg); }
+  }
+
+  /* Streak */
+  .streak-msg {
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    color: var(--gold);
+    text-align: center;
+    margin-top: 8px;
+    min-height: 28px;
+  }
+
+  /* Divider */
+  .px-divider {
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--diamond) 0, var(--diamond) 8px, transparent 8px, transparent 16px);
+    border-radius: 2px;
+    margin: 16px 0;
+    opacity: 0.3;
+  }
+  /* Side characters */
+  .side-character {
+    position: absolute;
+    bottom: -10px;
+    z-index: -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    pointer-events: none;
+  }
+
+  .steve-char {
+    left: -120px;
+    animation: idleSteve 4s infinite alternate ease-in-out;
+    transform-origin: bottom center;
+  }
+
+  .creeper-char {
+    right: -120px;
+    animation: idleCreeper 5s infinite alternate ease-in-out;
+    transform-origin: bottom center;
+  }
+
+  @keyframes idleSteve {
+    0% { transform: rotate(-2deg); }
+    100% { transform: rotate(2deg); }
+  }
+
+  @keyframes idleCreeper {
+    0% { transform: rotate(2deg); }
+    100% { transform: rotate(-2deg); }
+  }
+
+  @media (max-width: 950px) {
+    .side-character { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="floating-blocks" id="floatingBlocks"></div>
+<div class="confetti-area" id="confettiArea"></div>
+
+<div class="container">
+  
+  <!-- Side characters directly next to the container -->
+  <div class="side-character steve-char">
+    <svg width="120" height="240" viewBox="0 0 16 32" xmlns="http://www.w3.org/2000/svg" style="image-rendering: pixelated;">
+      <!-- Head -->
+      <rect x="4" y="0" width="8" height="8" fill="#d19565"/>
+      <rect x="4" y="0" width="8" height="2" fill="#493627"/>
+      <rect x="4" y="2" width="1" height="1" fill="#493627"/>
+      <rect x="11" y="2" width="1" height="1" fill="#493627"/>
+      <rect x="5" y="4" width="2" height="1" fill="#ffffff"/>
+      <rect x="6" y="4" width="1" height="1" fill="#4a3e9c"/>
+      <rect x="9" y="4" width="2" height="1" fill="#ffffff"/>
+      <rect x="9" y="4" width="1" height="1" fill="#4a3e9c"/>
+      <rect x="7" y="5" width="2" height="1" fill="#9b6e4e"/>
+      <rect x="6" y="6" width="4" height="1" fill="#6d4631"/>
+      <!-- Body -->
+      <rect x="4" y="8" width="8" height="12" fill="#00aaaa"/>
+      <rect x="7" y="8" width="2" height="1" fill="#d19565"/>
+      <!-- Arms -->
+      <rect x="0" y="8" width="4" height="4" fill="#00aaaa"/>
+      <rect x="0" y="12" width="4" height="8" fill="#d19565"/>
+      <rect x="12" y="8" width="4" height="4" fill="#00aaaa"/>
+      <rect x="12" y="12" width="4" height="8" fill="#d19565"/>
+      <!-- Legs -->
+      <rect x="4" y="20" width="4" height="9" fill="#3d3db8"/>
+      <rect x="4" y="29" width="4" height="3" fill="#666666"/>
+      <rect x="8" y="20" width="4" height="9" fill="#3d3db8"/>
+      <rect x="8" y="29" width="4" height="3" fill="#666666"/>
+    </svg>
+  </div>
+
+  <div class="side-character creeper-char">
+    <svg width="120" height="240" viewBox="0 0 16 32" xmlns="http://www.w3.org/2000/svg" style="image-rendering: pixelated;">
+      <!-- Head -->
+      <rect x="4" y="4" width="8" height="8" fill="#55cc55"/>
+      <rect x="5" y="6" width="2" height="2" fill="#000000"/>
+      <rect x="9" y="6" width="2" height="2" fill="#000000"/>
+      <rect x="7" y="8" width="2" height="3" fill="#000000"/>
+      <rect x="6" y="9" width="1" height="3" fill="#000000"/>
+      <rect x="9" y="9" width="1" height="3" fill="#000000"/>
+      <!-- Body -->
+      <rect x="4" y="12" width="8" height="12" fill="#55cc55"/>
+      <!-- Legs -->
+      <rect x="2" y="24" width="4" height="8" fill="#55cc55"/>
+      <rect x="10" y="24" width="4" height="8" fill="#55cc55"/>
+      <!-- Some darker green pixels -->
+      <rect x="5" y="4" width="1" height="1" fill="#3db13d"/>
+      <rect x="11" y="7" width="1" height="1" fill="#3db13d"/>
+      <rect x="4" y="10" width="1" height="1" fill="#3db13d"/>
+      <rect x="7" y="14" width="1" height="1" fill="#3db13d"/>
+      <rect x="10" y="18" width="1" height="1" fill="#3db13d"/>
+      <rect x="5" y="21" width="1" height="1" fill="#3db13d"/>
+      <rect x="3" y="28" width="1" height="1" fill="#3db13d"/>
+      <rect x="12" y="26" width="1" height="1" fill="#3db13d"/>
+    </svg>
+  </div>
+  <div class="header">
+    <span class="deco">⛏️</span>
+    <h1>MINECRAFT<br>KVÍZ</h1>
+    <div class="subtitle">💎 Gyémánt Vadász 💎</div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div class="screen active card" id="startScreen">
+    <div class="start-content">
+      <span class="creeper-deco">🟩</span>
+      <p>Üdvözöllek a Minecraft Kvízben!<br>Bizonyítsd be, hogy igazi mesterbányász vagy! ⛏️</p>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="icon">❓</span>
+          <span class="label">Kérdések</span>
+          <span class="value">10 db</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">❤️</span>
+          <span class="label">Életek</span>
+          <span class="value">3 db</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">💎</span>
+          <span class="label">Max nyeremény</span>
+          <span class="value">512 💎</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">⭐</span>
+          <span class="label">Nehézség</span>
+          <span class="value">3 SZINT</span>
+        </div>
+      </div>
+      <div class="px-divider"></div>
+      <p>Minden helyes válasznál duplázódik a gyémántod!<br>Ha elfogy a 3 életed, vége a játéknak. 😱</p>
+      <br>
+      <button class="big-btn" onclick="startGame()">🎮 JÁTÉK INDÍTÁSA!</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen card" id="gameScreen">
+    <div class="progress-row">
+      <span class="progress-label" id="qLabel">1/10</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+      <div class="lives" id="livesDisplay">
+        <span class="heart" id="h1">❤️</span>
+        <span class="heart" id="h2">❤️</span>
+        <span class="heart" id="h3">❤️</span>
+      </div>
+    </div>
+    <div class="prize-row" id="prizeRow"></div>
+    <div id="diffBadge" class="diff-badge diff-easy">KÖNNYŰ</div>
+    <div class="question-num" id="questionNum">1. KÉRDÉS</div>
+    <div class="question-text" id="questionText">Betöltés...</div>
+    <div class="answers" id="answersContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="streak-msg" id="streakMsg"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">KÖVETKEZŐ ▶</button>
+  </div>
+
+  <!-- END SCREEN -->
+  <div class="screen card" id="endScreen">
+    <div class="end-content">
+      <div class="result-big" id="resultTitle">JÁTÉK VÉGE!</div>
+      <div class="diamonds-display" id="diamondDisplay">💎</div>
+      <div class="diamond-count" id="diamondCount">0 gyémánt</div>
+      <div class="praise" id="praiseText"></div>
+      <div class="px-divider"></div>
+      <button class="big-btn" onclick="restartGame()">🔄 ÚJA JÁTSZOM!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== QUESTIONS ===================
+const ALL_QUESTIONS = [
+  // === KÖNNYŰ (easy) ===
+  { q: "Mi az alap anyag, amiből a Minecraft világ épül fel?", a: ["Kövek","Blokkok","Fák","Homok"], c: 1, diff: "easy" },
+  { q: "Melyik állat ad tejet a Minecraftban?", a: ["Juh","Disznó","Tehén","Tyúk"], c: 2, diff: "easy" },
+  { q: "Mi kell ahhoz, hogy túléld az első éjszakát?", a: ["Arany","Étel","Vas","Menedék és ágy"], c: 3, diff: "easy" },
+  { q: "Melyik fa a legelterjedtebb a játékban?", a: ["Nyírfa","Sötét tölgy","Tölgyfa","Akác"], c: 2, diff: "easy" },
+  { q: "Milyen színű a Kúszó (Creeper)?", a: ["Piros","Kék","Zöld","Sárga"], c: 2, diff: "easy" },
+  { q: "Mit ad a tehén, ha megölöd?", a: ["Gyapjút","Bőrt és nyers marhahúst","Tojást","Tejet"], c: 1, diff: "easy" },
+  { q: "Melyik eszközzel vágsz fát a leggyorsabban?", a: ["Kard","Ásó","Fejsze","Csákány"], c: 2, diff: "easy" },
+  { q: "Mi kell egy ágy elkészítéséhez?", a: ["Kő és fa","Gyapjú és deszka","Vas és gyapjú","Föld és kő"], c: 1, diff: "easy" },
+  { q: "Hány hely (slot) van a játékos alapvető hátizsákjában (leltárában)?", a: ["27","36","45","54"], c: 1, diff: "easy" },
+  { q: "Melyik állat tojik tojást?", a: ["Disznó","Tyúk","Tehén","Kecske"], c: 1, diff: "easy" },
+  { q: "Mi a Végzetmanó (Enderman) különlegessége?", a: ["Repül","Teleportál és nem szereti a vizet","Robban","Mérgez"], c: 1, diff: "easy" },
+  { q: "Milyen anyagból készül a legelső szerszám a legtöbb esetben?", a: ["Kőből","Vasból","Fából","Aranyból"], c: 2, diff: "easy" },
+  { q: "Melyik életközösségben (biome-ban) esik a hó?", a: ["Sivatag","Dzsungel","Havas tundra","Szavanna"], c: 2, diff: "easy" },
+  { q: "Mi történik a Zombi (Zombie) szörnnyel nappal, ha napfény éri?", a: ["Alszik","Meggyullad és elég","Elmenekül","Elbújik a föld alá"], c: 1, diff: "easy" },
+  { q: "Melyik a legkevésbé tartós anyag szerszámkészítéshez?", a: ["Arany","Vas","Kő","Fa"], c: 0, diff: "easy" },
+  { q: "Mivel lehet a leggyorsabban ásni a földet és a homokot?", a: ["Csákány","Fejsze","Kapa","Ásó"], c: 3, diff: "easy" },
+  { q: "Mit eszik a birka, hogy visszanőjön a gyapja?", a: ["Füvet","Búzát","Sárgarépát","Virágot"], c: 0, diff: "easy" },
+  { q: "Hány bot (stick) és szén (coal) kell 4 fáklya elkészítéséhez?", a: ["1 bot, 1 szén","2 bot, 1 szén","1 bot, 2 szén","4 bot, 4 szén"], c: 0, diff: "easy" },
+
+  // === KÖZEPES (medium) ===
+  { q: "Melyik ércből kapod a legtöbb tapasztalati pontot (XP) bányászatkor?", a: ["Kőszén","Vas","Gyémánt","Lapis lazuli"], c: 2, diff: "medium" },
+  { q: "Mire használható a Nether Csillag (Nether Star)?", a: ["Jelzőtűz (Beacon) készítésére","Varázslóasztalhoz","Portál nyitásához","Sárkánytojás kikeléséhez"], c: 0, diff: "medium" },
+  { q: "Hány élete (szíve) van alapból a játékosnak?", a: ["8","10","12","20"], c: 1, diff: "medium" },
+  { q: "Melyik szörny dobja el a Wither Rózsát (Wither Rose), ha megöl valamit?", a: ["Kúszó (Creeper)","Csontváz (Skeleton)","Wither Főnök (Wither Boss)","Őrláng (Blaze)"], c: 2, diff: "medium" },
+  { q: "Mi kell a Netherite szerszám elkészítéséhez?", a: ["Netherite rúd + vas szerszám","Netherite rúd + gyémánt szerszám","Csak netherite rúd","Netherite rúd + arany szerszám"], c: 1, diff: "medium" },
+  { q: "Melyik életközösségben (biome-ban) él az ocelot?", a: ["Sivatag","Dzsungel","Tundra","Szavanna"], c: 1, diff: "medium" },
+  { q: "Hány perc egy teljes nappal-éjszaka ciklus a játékban (valós időben)?", a: ["5 perc","10 perc","20 perc","15 perc"], c: 2, diff: "medium" },
+  { q: "Mivel lehet megszelídíteni a farkasokat?", a: ["Csonttal","Nyers hússal","Hallal","Kenyérrel"], c: 0, diff: "medium" },
+  { q: "Hogy hívják azt a Nether életközösséget, ahol a Malacemberek (Piglin) élnek?", a: ["Nether Pusztaság","Karmazsin Erdő (Crimson Forest)","Torz Erdő (Warped Forest)","Lélekhomok Völgy"], c: 1, diff: "medium" },
+  { q: "Melyik varázslat (enchantment) teszi a kardot erősebbé?", a: ["Hatékonyság (Efficiency)","Sújtás (Sharpness)","Szerencse (Fortune)","Fosztogatás (Looting)"], c: 1, diff: "medium" },
+  { q: "Mit dobhat a Wither Csontváz (Wither Skeleton), ha legyőzöd?", a: ["Csontot és szenet","Végzetgyöngyöt","Wither Csontváz Koponyát","Lávavödröt"], c: 2, diff: "medium" },
+  { q: "Mi a minimális Obszidián mennyiség, ami egy Nether-portálhoz kell?", a: ["8","10","12","14"], c: 1, diff: "medium" },
+  { q: "Melyik állat szeret tárgyakat a szájában hordani?", a: ["Rabló (Pillager)","Végzetmanó (Enderman)","Róka (Fox)","Allay"], c: 2, diff: "medium" },
+  { q: "Mi kell egy Varázslóasztal (Enchanting Table) elkészítéséhez?", a: ["Gyémánt + obszidián + könyv","Gyémánt + kő + könyv","Vas + obszidián + könyv","Gyémánt + deszka + könyv"], c: 0, diff: "medium" },
+  { q: "Melyik bájital (potion) elkészítéséhez kell Őrláng Por (Blaze Powder)?", a: ["Sebesség bájital","Erő bájital (Strength)","Láthatatlanság bájital","Gyógyító bájital"], c: 1, diff: "medium" },
+  { q: "Hány blokk mélységben (Y koordináta) érdemes leginkább gyémántot keresni az újabb verziókban?", a: ["Y=16 alatt","Y=0 körül","Y=-58 körül","Y=-100 alatt"], c: 2, diff: "medium" },
+  { q: "Mit ad a Nyálka (Slime), ha elpusztítod a legkisebb formáját?", a: ["Zöld festéket","Nyálkagolyót (Slimeball)","Pókhálót","Tapasztalati üveget"], c: 1, diff: "medium" },
+  { q: "Milyen blokkot kell használni, hogy a víz ne fagyjon be hóesésben?", a: ["Fáklya vagy fényforrás","Homok","Üveg","Lélekhomok"], c: 0, diff: "medium" },
+  { q: "Mi a neve annak a fának, amelyik a Nether Torz Erdejében nő?", a: ["Karmazsin fa","Torz fa (Warped stem)","Sötét tölgy","Szellemfűz"], c: 1, diff: "medium" },
+  { q: "Hogyan készíthetsz Végzet Szemét (Eye of Ender)?", a: ["Végzetgyöngy + Őrláng Por","Végzetgyöngy + Pók Szem","Üveg + Őrláng Por","Végzetgyöngy + Obszidián"], c: 0, diff: "medium" },
+
+  // === NEHÉZ (hard) ===
+  { q: "Melyik varázslat kell ahhoz, hogy a blokkot eredeti formájában bányászd ki (pl. érc helyett maga az ércblokk esik ki)?", a: ["Hatékonyság V","Selymes Érintés (Silk Touch)","Szerencse III","Javítás (Mending)"], c: 1, diff: "hard" },
+  { q: "Mire való a Mágneskő (Lodestone)?", a: ["Portál nyitásához","Iránytű hozzárendeléséhez, hogy mindig arra mutasson","Jelzőtűz (Beacon) erősítéséhez","Tárgyak vonzásához"], c: 1, diff: "hard" },
+  { q: "Melyik a legmagasabb szintű Sújtás (Sharpness) varázslat a játékban túlélő módban?", a: ["Sújtás III","Sújtás IV","Sújtás V","Sújtás VI"], c: 2, diff: "hard" },
+  { q: "Hogyan idézheted meg a Wither Főnököt (Wither Boss)?", a: ["4 Lélekhomok + 3 Wither Koponya","Nether portálba lávát öntve","3 Lélekhomok + 4 Csontváz Koponya","Az Endben a sárkánytojás felrobbantásával"], c: 0, diff: "hard" },
+  { q: "Kitől szerezheted meg a Halhatatlanság Totemjét (Totem of Undying)?", a: ["Idéző (Evoker) legyőzésével","Falusi pappal való kereskedéssel","Dungeon ládából","Boszorkány (Witch) legyőzésével"], c: 0, diff: "hard" },
+  { q: "Hány Őrláng Rúd (Blaze Rod) kell egy Főzőállvány (Brewing Stand) elkészítéséhez?", a: ["1","2","3","4"], c: 0, diff: "hard" },
+  { q: "Melyik életközösségben (biome-ban) találod az Ősi Várost (Ancient City)?", a: ["Mély Sötétség (Deep Dark)","Nether","Végzet (The End)","Dzsungel"], c: 0, diff: "hard" },
+  { q: "Mi az Allay különlegessége a többi mobhoz képest?", a: ["Tüzet okád","Zenére táncol és adott tárgyakat gyűjt","Teleportál","Meggyógyítja a játékost"], c: 1, diff: "hard" },
+  { q: "Melyik varázslat (enchantment) hozza vissza az eldobott Szigonyt (Trident)?", a: ["Hűség (Loyalty)","Örvény (Riptide)","Nyársalás (Impaling)","Közvetítés (Channeling)"], c: 0, diff: "hard" },
+  { q: "Hány gyémántra van szükség egy teljes gyémánt páncélzat (sisak, mellvért, nadrág, csizma) elkészítéséhez?", a: ["20","22","24","28"], c: 2, diff: "hard" },
+  { q: "Miből nyeri vissza az életerejét a Végzetsárkány (Ender Dragon)?", a: ["A lebegő szigetekből","Végzet Kristályokból (End Crystal)","A Végzetmanókból (Enderman)","A sötétségből"], c: 1, diff: "hard" },
+  { q: "Milyen anyagból készül az Újraéledés Horgonya (Respawn Anchor)?", a: ["Obszidián + Izzókő (Glowstone)","Síró Obszidián + Izzókő","Obszidián + Arany","Netherrack + Arany"], c: 1, diff: "hard" },
+  { q: "Melyik szörny képes vakságot (Blindness) okozni a játékosnak az Ősi Városban?", a: ["Végzetmanó (Enderman)","Warden (Őr)","Barlangi Pók (Cave Spider)","Idéző (Evoker)"], c: 1, diff: "hard" },
+  { q: "Mi a maximum szintje a Hatékonyság (Efficiency) varázslatnak túlélő módban?", a: ["IV","V","VI","VII"], c: 1, diff: "hard" },
+  { q: "Hogyan lehet Gyógyulás bájitalt (Potion of Healing) főzni?", a: ["Fura bájital + Csillogó dinnyeszelet","Fura bájital + Aranyrépa","Fura bájital + Pók szem","Vizes üveg + Magmakrém"], c: 0, diff: "hard" },
+  { q: "Mit ejt el a Shulker, amiből Shulker Doboz (Shulker Box) készíthető?", a: ["Shulker Gyöngyöt","Shulker Páncélt (Shulker Shell)","Végzetkristályt","Lebegő italt"], c: 1, diff: "hard" },
+  { q: "Mi történik, ha egy Malac (Pig) villámcsapást szenved?", a: ["Megsül és főtt sertéshúst ad","Zombi Malacemberré (Zombified Piglin) változik","Kúszóvá (Creeper) változik","Felrobban"], c: 1, diff: "hard" },
+  { q: "Kik élnek az Erdei Kúriában (Woodland Mansion)?", a: ["Falusiak","Boszorkányok és Zombik (Zombie)","Rablók (Pillager), Baltások (Vindicator) és Idézők (Evoker)","Csak Végzetmanók (Enderman)"], c: 2, diff: "hard" },
+];
+
+// Prize sequence
+const PRIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+const PRIZE_EMOJI = "💎";
+
+// Game state
+let state = {};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickQuestions() {
+  const easy   = shuffle(ALL_QUESTIONS.filter(q => q.diff === "easy")).slice(0, 4);
+  const medium = shuffle(ALL_QUESTIONS.filter(q => q.diff === "medium")).slice(0, 3);
+  const hard   = shuffle(ALL_QUESTIONS.filter(q => q.diff === "hard")).slice(0, 3);
+  return [...easy, ...medium, ...hard];
+}
+
+function startGame() {
+  state = {
+    questions: pickQuestions(),
+    current: 0,
+    lives: 3,
+    diamonds: 0,
+    streak: 0,
+    active: true
+  };
+  showScreen("gameScreen");
+  renderQuestion();
+}
+
+function restartGame() {
+  document.getElementById("confettiArea").innerHTML = "";
+  startGame();
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function renderLives() {
+  for (let i = 1; i <= 3; i++) {
+    const h = document.getElementById("h" + i);
+    h.classList.toggle("lost", i > state.lives);
+    if (i > state.lives) h.style.animation = "none";
+    else { h.style.animation = ""; }
+  }
+}
+
+function renderPrizeRow() {
+  const row = document.getElementById("prizeRow");
+  row.innerHTML = "";
+  for (let i = 0; i < 10; i++) {
+    const span = document.createElement("span");
+    span.className = "prize-gem";
+    if (i < state.current) span.classList.add("earned");
+    if (i === state.current) span.classList.add("active");
+    span.title = PRIZES[i] + " 💎";
+    span.textContent = PRIZE_EMOJI;
+    row.appendChild(span);
+  }
+}
+
+function renderQuestion() {
+  const q = state.questions[state.current];
+  const num = state.current + 1;
+
+  // Progress
+  document.getElementById("qLabel").textContent = num + "/10";
+  document.getElementById("progressFill").style.width = (num * 10) + "%";
+
+  // Lives
+  renderLives();
+
+  // Prize row
+  renderPrizeRow();
+
+  // Difficulty badge
+  const badge = document.getElementById("diffBadge");
+  badge.className = "diff-badge";
+  if (q.diff === "easy")   { badge.classList.add("diff-easy");   badge.textContent = "⭐ KÖNNYŰ"; }
+  if (q.diff === "medium") { badge.classList.add("diff-medium"); badge.textContent = "⭐⭐ KÖZEPES"; }
+  if (q.diff === "hard")   { badge.classList.add("diff-hard");   badge.textContent = "⭐⭐⭐ NEHÉZ"; }
+
+  document.getElementById("questionNum").textContent = num + ". KÉRDÉS";
+  document.getElementById("questionText").textContent = q.q;
+
+  // Shuffle answers
+  const letters = ["A","B","C","D"];
+  const cls = ["ans-a","ans-b","ans-c","ans-d"];
+  const indices = shuffle([0,1,2,3]);
+  const answerOrder = indices.map(i => ({ text: q.a[i], original: i }));
+
+  const container = document.getElementById("answersContainer");
+  container.innerHTML = "";
+  answerOrder.forEach((ans, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "answer-btn " + cls[idx];
+    btn.innerHTML = `<span class="letter">${letters[idx]}</span><span>${ans.text}</span>`;
+    btn.dataset.original = ans.original;
+    btn.onclick = () => handleAnswer(btn, ans.original === q.c, answerOrder, q.c);
+    container.appendChild(btn);
+  });
+
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("streakMsg").textContent = "";
+  document.getElementById("nextBtn").classList.remove("visible");
+}
+
+function handleAnswer(btn, isCorrect, answerOrder, correctOriginal) {
+  if (!state.active) return;
+
+  // Disable all buttons
+  document.querySelectorAll(".answer-btn").forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    btn.classList.add("correct");
+    state.diamonds = PRIZES[state.current];
+    state.streak++;
+    const feedback = document.getElementById("feedback");
+    feedback.className = "feedback correct";
+    const msgs = ["🎉 HELYES! Remek!","✅ IGEN! Szuper vagy!","💎 BRAVO! Mester!","🌟 WOW! Tökéletes!","⚡ IGEN! Zseniális!"];
+    feedback.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    // Streak message
+    if (state.streak >= 3) {
+      const sm = document.getElementById("streakMsg");
+      sm.textContent = "🔥 " + state.streak + " egymást követő helyes válasz! Tűzben vagy!";
+    }
+    // Animate prize gem
+    setTimeout(() => {
+      const gems = document.querySelectorAll(".prize-gem");
+      if (gems[state.current]) {
+        gems[state.current].classList.remove("active");
+        gems[state.current].classList.add("earned");
+      }
+    }, 400);
+  } else {
+    btn.classList.add("wrong");
+    state.lives--;
+    state.streak = 0;
+    // Reveal correct answer
+    document.querySelectorAll(".answer-btn").forEach(b => {
+      if (parseInt(b.dataset.original) === correctOriginal) b.classList.add("correct");
+    });
+    const feedback = document.getElementById("feedback");
+    feedback.className = "feedback wrong";
+    const msgs = ["😅 Sajnos nem jó...","💔 Nem ez volt!","🙈 Majdnem! Próbáld újra!","😬 Óh nem! De semmi gond!"];
+    feedback.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    renderLives();
+    if (state.lives <= 0) {
+      setTimeout(() => endGame(false), 1200);
+      return;
+    }
+  }
+
+  document.getElementById("nextBtn").classList.add("visible");
+
+  if (state.current === 9 && isCorrect) {
+    setTimeout(() => endGame(true), 1400);
+    return;
+  }
+}
+
+function nextQuestion() {
+  state.current++;
+  if (state.current >= 10) {
+    endGame(state.diamonds === PRIZES[9]);
+    return;
+  }
+  renderQuestion();
+}
+
+function endGame(won) {
+  showScreen("endScreen");
+  const d = state.diamonds;
+  let title, praise;
+
+  if (d === 0) {
+    title = "😢 JÁTÉK VÉGE!";
+    praise = "Ne add fel! Próbáld újra, és biztosan menni fog! 💪 Minden mesterbányász így kezdte!";
+  } else if (d <= 4) {
+    title = "🌱 JÓ KEZDÉS!";
+    praise = "Szép munka! Már bányász vagy! Gyakorolj még és hamarosan profi leszel! 🪓";
+  } else if (d <= 32) {
+    title = "⚒️ BÁNYÁSZ VAGY!";
+    praise = "Nagyon ügyes voltál! Egyre közelebb vagy a mestercímhez! Büszke lehetsz magadra! 🌟";
+  } else if (d <= 128) {
+    title = "💎 GYÉMÁNT BÁNYÁSZ!";
+    praise = "Hihetetlen teljesítmény! Igazi gyémántvadász vagy! A barátaid biztosan irigykednek! 🏆";
+  } else if (d === 512) {
+    title = "👑 MINECRAFT MESTER!";
+    praise = "TÖKÉLETES! Te vagy a legjobb Minecraft-tudós! Steve és Alex is büszke lenne rád! 🎊🎉";
+  } else {
+    title = "🔥 SZUPER JÁTÉK!";
+    praise = "Fantasztikusan teljesítettél! Igazi mesterbányász vagy! 💎⛏️";
+  }
+
+  document.getElementById("resultTitle").textContent = title;
+  document.getElementById("diamondCount").textContent = d + " gyémánt összegyűjtve!";
+  document.getElementById("praiseText").textContent = praise;
+
+  // Diamond display
+  const dd = document.getElementById("diamondDisplay");
+  if (d === 0) dd.textContent = "😢";
+  else if (d <= 8) dd.textContent = "💎";
+  else if (d <= 64) dd.textContent = "💎💎";
+  else dd.textContent = "💎💎💎";
+
+  if (d > 0) launchConfetti();
+}
+
+// =================== VISUALS ===================
+function makeStars() {
+  const c = document.getElementById("stars");
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement("div");
+    s.className = "star";
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*60}%;
+      animation-delay:${Math.random()*3}s;
+      animation-duration:${1.5+Math.random()*2}s;
+    `;
+    c.appendChild(s);
+  }
+}
+
+const BLOCK_COLORS = [
+  "#5D9B3A","#8B5E3C","#8A8A8A","#4AECF5",
+  "#FFD700","#966F33","#50C878","#E74C3C"
+];
+function makeFloatingBlocks() {
+  const c = document.getElementById("floatingBlocks");
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement("div");
+    b.className = "block";
+    const color = BLOCK_COLORS[Math.floor(Math.random() * BLOCK_COLORS.length)];
+    b.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${20+Math.random()*24}px;
+      height:${20+Math.random()*24}px;
+      background:${color};
+      border:2px solid ${color}cc;
+      animation-duration:${8+Math.random()*12}s;
+      animation-delay:${Math.random()*-15}s;
+      border-radius:3px;
+    `;
+    c.appendChild(b);
+  }
+}
+
+function launchConfetti() {
+  const area = document.getElementById("confettiArea");
+  const colors = ["#4AECF5","#FFD700","#50C878","#E74C3C","#9B59B6","#F9CA24","#FF6B6B","#4A90E2"];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const conf = document.createElement("div");
+      conf.className = "conf";
+      conf.style.cssText = `
+        left:${Math.random()*100}%;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        width:${6+Math.random()*10}px;
+        height:${6+Math.random()*10}px;
+        border-radius:${Math.random()>0.5?"50%":"2px"};
+        animation-duration:${2+Math.random()*2}s;
+        animation-delay:${Math.random()*1}s;
+      `;
+      area.appendChild(conf);
+      setTimeout(() => conf.remove(), 4000);
+    }, i * 40);
+  }
+}
+
+// Init
+makeStars();
+makeFloatingBlocks();
+</script>
+</body>
+</html>
