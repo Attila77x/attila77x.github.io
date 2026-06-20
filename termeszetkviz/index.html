@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Természet Kvíz ⚡</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&family=Nunito:wght@600;700;800&display=swap');
+
+  :root {
+    --cyan: #4AECF5;
+    --cyan-dark: #1BC8D4;
+    --energy: #FFE15D;
+    --nebula: #6C5CE7;
+    --green: #5ED66B;
+    --red: #FF6B6B;
+    --orange: #FF914D;
+    --gold: #FFD700;
+    --white: #EAF1FF;
+    --bg: #0b1026;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Space / sky background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(180deg, #060814 0%, #0d1430 35%, #18265c 65%, #243a86 100%);
+    z-index: -3;
+  }
+
+  /* Stars */
+  .stars {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 2s infinite alternate;
+  }
+  @keyframes twinkle {
+    from { opacity: 0.3; transform: scale(1); }
+    to   { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* Lightning flash */
+  .flash {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background: radial-gradient(circle at var(--fx, 50%) -10%, rgba(255,255,220,0.55), rgba(150,200,255,0.18) 45%, transparent 65%);
+    opacity: 0;
+  }
+  .flash.on { animation: flashAnim 0.7s ease; }
+  @keyframes flashAnim {
+    0%{opacity:0;} 6%{opacity:1;} 14%{opacity:0.15;}
+    22%{opacity:0.95;} 38%{opacity:0;} 100%{opacity:0;}
+  }
+  .bolt {
+    position: fixed; top: -8px; z-index: -2; pointer-events: none;
+    width: 90px; opacity: 0;
+    filter: drop-shadow(0 0 10px var(--energy)) drop-shadow(0 0 22px #fff6);
+    transform: translateX(-50%);
+  }
+  .bolt.on { animation: boltAnim 0.7s ease; }
+  @keyframes boltAnim {
+    0%{opacity:0;} 8%{opacity:1;} 26%{opacity:0.25;}
+    40%{opacity:1;} 65%{opacity:0;} 100%{opacity:0;}
+  }
+
+  /* Floating science icons */
+  .floating-icons {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden;
+  }
+  .float-icon {
+    position: absolute;
+    opacity: 0.22;
+    animation: floatUp linear infinite;
+    filter: drop-shadow(0 0 6px rgba(120,200,255,0.35));
+  }
+  @keyframes floatUp {
+    from { transform: translateY(110vh) rotate(0deg); }
+    to   { transform: translateY(-12vh) rotate(360deg); }
+  }
+
+  /* Layout */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 28px 20px 20px;
+  }
+  .header h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 4vw, 22px);
+    color: var(--cyan);
+    text-shadow:
+      3px 3px 0 #0a6a74,
+      -1px -1px 0 #0a6a74,
+      0 0 20px var(--cyan),
+      0 0 40px #4AECF566;
+    line-height: 1.7;
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(16px, 4vw, 22px);
+    color: var(--energy);
+    margin-top: 8px;
+    text-shadow: 2px 2px 0 #8a6b00;
+  }
+  .header .deco {
+    font-size: clamp(24px, 6vw, 42px);
+    margin-bottom: 6px;
+    display: block;
+    animation: bounce 1.5s infinite;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  /* Card */
+  .card {
+    background: rgba(12,22,52,0.82);
+    border: 4px solid var(--cyan);
+    border-radius: 16px;
+    padding: 28px 24px;
+    box-shadow:
+      0 0 30px #4AECF540,
+      inset 0 0 20px rgba(74,236,245,0.05);
+    backdrop-filter: blur(6px);
+    margin-bottom: 20px;
+  }
+
+  /* Progress bar */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .progress-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--cyan);
+    white-space: nowrap;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 14px;
+    background: #131e3e;
+    border-radius: 7px;
+    border: 2px solid var(--cyan-dark);
+    overflow: hidden;
+    min-width: 100px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan-dark), var(--cyan));
+    border-radius: 7px;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 8px var(--cyan);
+  }
+
+  /* Lives */
+  .lives { display: flex; gap: 8px; align-items: center; }
+  .heart {
+    font-size: 26px;
+    transition: transform 0.3s, filter 0.3s;
+  }
+  .heart.lost {
+    filter: grayscale(1) opacity(0.3);
+    transform: scale(0.85);
+  }
+
+  /* Badges row */
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .diff-badge, .topic-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 6px 11px;
+    border-radius: 20px;
+    line-height: 1.3;
+  }
+  .diff-easy   { background: #123512; color: var(--green); border: 2px solid var(--green); }
+  .diff-medium { background: #3a3008; color: var(--energy); border: 2px solid var(--energy); }
+  .diff-hard   { background: #3a1010; color: var(--red);   border: 2px solid var(--red); }
+  .topic-badge { background: rgba(108,92,231,0.15); }
+  .topic-badge .t-emoji { font-size: 12px; }
+
+  /* Prize indicator */
+  .prize-row {
+    display: flex; justify-content: center; gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .prize-gem {
+    font-size: 20px;
+    transition: all 0.3s;
+    filter: grayscale(0.7) opacity(0.4);
+  }
+  .prize-gem.active {
+    filter: none;
+    transform: scale(1.2);
+    animation: gemGlow 1s infinite alternate;
+  }
+  .prize-gem.earned { filter: none; transform: scale(1.1); }
+  @keyframes gemGlow {
+    from { filter: brightness(1); }
+    to   { filter: brightness(1.5) drop-shadow(0 0 6px var(--energy)); }
+  }
+
+  /* Question */
+  .question-num {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #9fb0d6;
+    margin-bottom: 8px;
+  }
+  .question-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(18px, 5vw, 26px);
+    color: var(--white);
+    margin-bottom: 22px;
+    line-height: 1.5;
+    text-shadow: 1px 1px 4px #000;
+  }
+
+  /* Answers */
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .answers { grid-template-columns: 1fr; }
+  }
+
+  .answer-btn {
+    position: relative;
+    padding: 14px 12px;
+    border: 3px solid;
+    border-radius: 12px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(14px, 3.5vw, 18px);
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    line-height: 1.3;
+    overflow: hidden;
+    background: transparent;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .answer-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .answer-btn:hover:not(:disabled)::before { opacity: 1; }
+  .answer-btn:active:not(:disabled) { transform: scale(0.97); }
+
+  .ans-a { border-color: #4A90E2; color: #9CCBFF; }
+  .ans-a::before { background: #4A90E215; }
+  .ans-a:hover:not(:disabled) { background: #4A90E220; box-shadow: 0 0 12px #4A90E240; }
+
+  .ans-b { border-color: #FF6B6B; color: #FFA8A8; }
+  .ans-b::before { background: #FF6B6B15; }
+  .ans-b:hover:not(:disabled) { background: #FF6B6B20; box-shadow: 0 0 12px #FF6B6B40; }
+
+  .ans-c { border-color: #FFE15D; color: #FFEE9B; }
+  .ans-c::before { background: #FFE15D15; }
+  .ans-c:hover:not(:disabled) { background: #FFE15D20; box-shadow: 0 0 12px #FFE15D40; }
+
+  .ans-d { border-color: #6C5CE7; color: #B8A9FF; }
+  .ans-d::before { background: #6C5CE715; }
+  .ans-d:hover:not(:disabled) { background: #6C5CE720; box-shadow: 0 0 12px #6C5CE740; }
+
+  .answer-btn .letter {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .ans-a .letter { background: #4A90E230; border: 1px solid #4A90E2; color: #9CCBFF; }
+  .ans-b .letter { background: #FF6B6B30; border: 1px solid #FF6B6B; color: #FFA8A8; }
+  .ans-c .letter { background: #FFE15D30; border: 1px solid #FFE15D; color: #FFEE9B; }
+  .ans-d .letter { background: #6C5CE730; border: 1px solid #6C5CE7; color: #B8A9FF; }
+
+  .answer-btn.correct {
+    background: #123512 !important;
+    border-color: var(--green) !important;
+    color: var(--green) !important;
+    animation: correctFlash 0.5s ease;
+  }
+  .answer-btn.wrong {
+    background: #3a1010 !important;
+    border-color: var(--red) !important;
+    color: var(--red) !important;
+    animation: wrongShake 0.4s ease;
+  }
+  @keyframes correctFlash {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  @keyframes wrongShake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    60%      { transform: translateX(6px); }
+  }
+
+  /* Feedback */
+  .feedback {
+    text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(18px, 5vw, 26px);
+    margin-top: 18px;
+    min-height: 40px;
+    transition: all 0.3s;
+  }
+  .feedback.correct { color: var(--green); text-shadow: 0 0 12px #5ED66B80; }
+  .feedback.wrong   { color: #FF8A8A;      text-shadow: 0 0 12px #FF6B6B80; }
+
+  /* Fun fact line */
+  .funfact {
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: clamp(13px, 3.4vw, 16px);
+    color: #BDE0FF;
+    margin-top: 10px;
+    min-height: 20px;
+    line-height: 1.4;
+  }
+
+  /* Next button */
+  .next-btn {
+    margin: 20px auto 0;
+    padding: 14px 40px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    background: linear-gradient(135deg, var(--cyan-dark), var(--cyan));
+    color: #06121f;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #0a6a74, 0 0 20px #4AECF540;
+    transition: all 0.15s;
+    display: none;
+  }
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #0a6a74, 0 0 30px #4AECF560; }
+  .next-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0a6a74; }
+  .next-btn.visible { display: block; }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Start screen */
+  .start-content { text-align: center; }
+  .start-content p {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(15px, 4vw, 19px);
+    color: #BDE0FF;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin: 22px 0;
+  }
+  .info-item {
+    background: rgba(74,236,245,0.07);
+    border: 2px solid rgba(74,236,245,0.25);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .info-item .icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .info-item .label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    color: var(--white);
+    display: block;
+  }
+  .info-item .value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--cyan);
+    display: block;
+    margin-top: 4px;
+  }
+  .topic-chips {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    margin: 18px 0 4px;
+  }
+  .topic-chip {
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 20px;
+    background: rgba(108,92,231,0.12);
+    border: 2px solid rgba(108,92,231,0.5);
+    color: #D7CEFF;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  .big-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 3vw, 16px);
+    padding: 18px 40px;
+    background: linear-gradient(135deg, var(--cyan-dark), var(--cyan));
+    color: #06121f;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #0a6a74, 0 0 30px #4AECF550;
+    transition: all 0.15s;
+    margin: 10px auto;
+    display: inline-block;
+  }
+  .big-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #0a6a74, 0 0 40px #4AECF570; }
+  .big-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #0a6a74; }
+
+  /* End screen */
+  .end-content { text-align: center; }
+  .result-big {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 4vw, 20px);
+    color: var(--cyan);
+    text-shadow: 0 0 20px var(--cyan);
+    margin-bottom: 10px;
+    line-height: 1.7;
+  }
+  .stars-display {
+    font-size: clamp(40px, 12vw, 70px);
+    margin: 16px 0;
+    animation: bigBounce 1s ease infinite;
+  }
+  @keyframes bigBounce {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.1) rotate(-5deg); }
+  }
+  .praise {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(20px, 5vw, 30px);
+    color: var(--energy);
+    text-shadow: 2px 2px 0 #8a6b00;
+    margin: 14px 0;
+    line-height: 1.4;
+  }
+  .star-count {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 4vw, 22px);
+    color: var(--green);
+    margin: 14px 0;
+    text-shadow: 0 0 16px var(--green);
+  }
+  .confetti-area {
+    position: fixed; inset: 0; pointer-events: none; z-index: 100;
+    overflow: hidden;
+  }
+  .conf {
+    position: absolute;
+    width: 10px; height: 10px;
+    top: -20px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .hero-deco {
+    font-size: clamp(36px, 10vw, 60px);
+    display: block;
+    margin: 10px auto;
+    animation: creepBounce 0.8s infinite alternate;
+  }
+  @keyframes creepBounce {
+    from { transform: translateY(0) rotate(-3deg); }
+    to   { transform: translateY(-8px) rotate(3deg); }
+  }
+
+  /* Streak */
+  .streak-msg {
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    color: var(--energy);
+    text-align: center;
+    margin-top: 8px;
+    min-height: 28px;
+  }
+
+  /* Divider */
+  .px-divider {
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--cyan) 0, var(--cyan) 8px, transparent 8px, transparent 16px);
+    border-radius: 2px;
+    margin: 16px 0;
+    opacity: 0.3;
+  }
+
+  /* Side characters */
+  .side-character {
+    position: absolute;
+    bottom: -10px;
+    z-index: -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    pointer-events: none;
+  }
+  .astro-char {
+    left: -130px;
+    animation: idleAstro 4s infinite alternate ease-in-out;
+    transform-origin: bottom center;
+  }
+  .saturn-char {
+    right: -135px;
+    bottom: 40px;
+    animation: idleSaturn 6s infinite alternate ease-in-out;
+    transform-origin: center;
+  }
+  @keyframes idleAstro {
+    0% { transform: rotate(-2deg) translateY(0); }
+    100% { transform: rotate(2deg) translateY(-8px); }
+  }
+  @keyframes idleSaturn {
+    0% { transform: rotate(-6deg) translateY(0); }
+    100% { transform: rotate(6deg) translateY(-14px); }
+  }
+  @media (max-width: 980px) {
+    .side-character { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="floating-icons" id="floatingIcons"></div>
+<div class="flash" id="flash"></div>
+<svg class="bolt" id="bolt" viewBox="0 0 40 90" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="22,0 4,46 17,46 10,90 38,34 23,34 32,0" fill="#FFE15D" stroke="#fff7c2" stroke-width="1.5"/>
+</svg>
+<div class="confetti-area" id="confettiArea"></div>
+
+<div class="container">
+
+  <!-- Side characters -->
+  <div class="side-character astro-char">
+    <svg width="130" height="240" viewBox="0 0 120 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="visorGlow" cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#6fd6ff"/>
+          <stop offset="55%" stop-color="#2a3a7a"/>
+          <stop offset="100%" stop-color="#101a3c"/>
+        </radialGradient>
+      </defs>
+      <!-- backpack -->
+      <rect x="33" y="56" width="54" height="64" rx="12" fill="#aeb9d6"/>
+      <!-- body -->
+      <rect x="36" y="60" width="48" height="70" rx="16" fill="#eef2fb" stroke="#c3cbe0" stroke-width="2"/>
+      <!-- chest panel -->
+      <rect x="49" y="80" width="22" height="16" rx="3" fill="#1a2456"/>
+      <circle cx="55" cy="88" r="2.2" fill="#5ED66B"/>
+      <circle cx="63" cy="88" r="2.2" fill="#FFE15D"/>
+      <!-- arms -->
+      <rect x="19" y="64" width="18" height="48" rx="9" fill="#eef2fb" stroke="#c3cbe0" stroke-width="2"/>
+      <rect x="83" y="64" width="18" height="48" rx="9" fill="#eef2fb" stroke="#c3cbe0" stroke-width="2"/>
+      <circle cx="28" cy="114" r="10" fill="#c9d2e6"/>
+      <circle cx="92" cy="114" r="10" fill="#c9d2e6"/>
+      <!-- legs -->
+      <rect x="40" y="126" width="18" height="52" rx="9" fill="#eef2fb" stroke="#c3cbe0" stroke-width="2"/>
+      <rect x="62" y="126" width="18" height="52" rx="9" fill="#eef2fb" stroke="#c3cbe0" stroke-width="2"/>
+      <rect x="35" y="170" width="25" height="16" rx="6" fill="#9aa6c4"/>
+      <rect x="60" y="170" width="25" height="16" rx="6" fill="#9aa6c4"/>
+      <!-- helmet -->
+      <circle cx="60" cy="40" r="31" fill="#eef2fb" stroke="#c3cbe0" stroke-width="3"/>
+      <ellipse cx="60" cy="42" rx="23" ry="21" fill="url(#visorGlow)"/>
+      <ellipse cx="51" cy="33" rx="6" ry="9" fill="#bfeaff" opacity="0.75"/>
+      <circle cx="68" cy="50" r="2" fill="#fff" opacity="0.7"/>
+    </svg>
+  </div>
+
+  <div class="side-character saturn-char">
+    <svg width="150" height="150" viewBox="0 0 150 130" xmlns="http://www.w3.org/2000/svg">
+      <!-- ring (back half) -->
+      <ellipse cx="75" cy="65" rx="68" ry="20" fill="none" stroke="#ffd98a" stroke-width="8" opacity="0.95"/>
+      <!-- planet -->
+      <circle cx="75" cy="62" r="40" fill="#ffb86b"/>
+      <path d="M37 54 Q75 48 113 54" stroke="#ef9a52" stroke-width="6" fill="none" opacity="0.6"/>
+      <path d="M40 74 Q75 80 110 74" stroke="#ef9a52" stroke-width="5" fill="none" opacity="0.6"/>
+      <!-- cheeks -->
+      <circle cx="58" cy="68" r="6" fill="#ff8f8f" opacity="0.55"/>
+      <circle cx="92" cy="68" r="6" fill="#ff8f8f" opacity="0.55"/>
+      <!-- eyes -->
+      <circle cx="64" cy="58" r="6.5" fill="#fff"/>
+      <circle cx="86" cy="58" r="6.5" fill="#fff"/>
+      <circle cx="65" cy="59" r="3" fill="#222"/>
+      <circle cx="87" cy="59" r="3" fill="#222"/>
+      <!-- smile -->
+      <path d="M64 72 Q75 82 86 72" stroke="#7a3b14" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- ring (front half) -->
+      <path d="M9 65 A 68 20 0 0 0 141 65" stroke="#ffe6ad" stroke-width="8" fill="none"/>
+    </svg>
+  </div>
+
+  <div class="header">
+    <span class="deco">⚡</span>
+    <h1>TERMÉSZET<br>KVÍZ</h1>
+    <div class="subtitle">🌍 Kis Tudósok Kalandja 🔭</div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div class="screen active card" id="startScreen">
+    <div class="start-content">
+      <span class="hero-deco">🚀</span>
+      <p>Üdv a Természet Kvízben!<br>Tedd próbára a tudásod a csillagoktól az állatokig! ⚡</p>
+      <div class="topic-chips">
+        <span class="topic-chip">🔭 Csillagászat</span>
+        <span class="topic-chip">⛅ Időjárás</span>
+        <span class="topic-chip">🌍 A Föld</span>
+        <span class="topic-chip">🦁 Állatok</span>
+        <span class="topic-chip">✈️ Repülés</span>
+        <span class="topic-chip">🧪 Tudomány</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="icon">❓</span>
+          <span class="label">Kérdés</span>
+          <span class="value">10 DB</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">❤️</span>
+          <span class="label">Élet</span>
+          <span class="value">3 DB</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">⭐</span>
+          <span class="label">Max jutalom</span>
+          <span class="value">512 ⭐</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📚</span>
+          <span class="label">Témakör</span>
+          <span class="value">6 DB</span>
+        </div>
+      </div>
+      <div class="px-divider"></div>
+      <p>Minden helyes válasznál duplázódik a csillagaid száma!<br>Ha elfogy mind a 3 életed, vége a kalandnak. 😮</p>
+      <br>
+      <button class="big-btn" onclick="startGame()">🎮 JÁTÉK INDÍTÁSA!</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen card" id="gameScreen">
+    <div class="progress-row">
+      <span class="progress-label" id="qLabel">1/10</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+      <div class="lives" id="livesDisplay">
+        <span class="heart" id="h1">❤️</span>
+        <span class="heart" id="h2">❤️</span>
+        <span class="heart" id="h3">❤️</span>
+      </div>
+    </div>
+    <div class="prize-row" id="prizeRow"></div>
+    <div class="badge-row">
+      <div id="diffBadge" class="diff-badge diff-easy">KÖNNYŰ</div>
+      <div id="topicBadge" class="topic-badge"><span class="t-emoji">🔭</span><span>Csillagászat</span></div>
+    </div>
+    <div class="question-num" id="questionNum">1. KÉRDÉS</div>
+    <div class="question-text" id="questionText">Betöltés...</div>
+    <div class="answers" id="answersContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="funfact" id="funfact"></div>
+    <div class="streak-msg" id="streakMsg"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">KÖVETKEZŐ ▶</button>
+  </div>
+
+  <!-- END SCREEN -->
+  <div class="screen card" id="endScreen">
+    <div class="end-content">
+      <div class="result-big" id="resultTitle">JÁTÉK VÉGE!</div>
+      <div class="stars-display" id="starDisplay">⭐</div>
+      <div class="star-count" id="starCount">0 csillag</div>
+      <div class="praise" id="praiseText"></div>
+      <div class="px-divider"></div>
+      <button class="big-btn" onclick="restartGame()">🔄 ÚJRA JÁTSZOM!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== TOPICS ===================
+const TOPICS = {
+  astro:  { icon: "🔭", name: "Csillagászat" },
+  meteo:  { icon: "⛅", name: "Időjárás" },
+  earth:  { icon: "🌍", name: "A Föld" },
+  animal: { icon: "🦁", name: "Állatok" },
+  fly:    { icon: "✈️", name: "Repülés" },
+  other:  { icon: "🧪", name: "Tudomány" }
+};
+
+// =================== QUESTIONS (136 db) ===================
+const ALL_QUESTIONS = [
+  // ============ KÖNNYŰ ============
+  // -- Csillagászat --
+  { q: "Melyik a hozzánk legközelebbi csillag?", a: ["A Hold","A Nap","A Sarkcsillag","A Mars"], c: 1, diff: "easy", t: "astro" },
+  { q: "Hány bolygó kering a Nap körül?", a: ["6","7","8","9"], c: 2, diff: "easy", t: "astro" },
+  { q: "Melyik bolygón élünk?", a: ["Mars","Vénusz","Föld","Jupiter"], c: 2, diff: "easy", t: "astro" },
+  { q: "Mi világít az égen éjszaka, és a Föld körül kering?", a: ["A Nap","A Hold","Egy üstökös","A Mars"], c: 1, diff: "easy", t: "astro" },
+  { q: "Melyik a legnagyobb bolygó a Naprendszerben?", a: ["Föld","Mars","Jupiter","Vénusz"], c: 2, diff: "easy", t: "astro" },
+  { q: "Melyik bolygót hívják a „vörös bolygónak”?", a: ["Mars","Vénusz","Merkúr","Szaturnusz"], c: 0, diff: "easy", t: "astro" },
+  { q: "Mivel utaznak az űrhajósok az űrbe?", a: ["Repülővel","Rakétával","Léggömbbel","Helikopterrel"], c: 1, diff: "easy", t: "astro" },
+  { q: "Mi a Nap valójában?", a: ["Egy bolygó","Egy hold","Egy csillag","Egy üstökös"], c: 2, diff: "easy", t: "astro" },
+  { q: "Mit látunk tiszta éjszakán az égen, ami apró pontokként ragyog?", a: ["Csillagokat","Felhőket","Repülőket","Halakat"], c: 0, diff: "easy", t: "astro" },
+  // -- Időjárás --
+  { q: "Mi hullik az égből, amikor esik az eső?", a: ["Homok","Víz","Levegő","Por"], c: 1, diff: "easy", t: "meteo" },
+  { q: "Mi hullik télen az égből fehér pelyhekben?", a: ["Eső","Hó","Jégeső","Köd"], c: 1, diff: "easy", t: "meteo" },
+  { q: "Melyik fényes villanás látszik az égen vihar idején?", a: ["Szivárvány","Villám","Csillag","Hold"], c: 1, diff: "easy", t: "meteo" },
+  { q: "Mi az a hangos dörgés a viharban?", a: ["Mennydörgés","Szellő","Eső","Visszhang"], c: 0, diff: "easy", t: "meteo" },
+  { q: "Milyen színes ív jelenik meg az égen eső után, napsütésben?", a: ["Szivárvány","Villám","Felhő","Üstökös"], c: 0, diff: "easy", t: "meteo" },
+  { q: "Mi mozgatja a fák leveleit és repteti a sárkányt?", a: ["A szél","Az eső","A hó","A Nap"], c: 0, diff: "easy", t: "meteo" },
+  { q: "Hány színe van a szivárványnak?", a: ["3","5","7","10"], c: 2, diff: "easy", t: "meteo" },
+  { q: "Honnan esik az eső?", a: ["A felhőkből","A csillagokból","A Holdból","A hegyekből"], c: 0, diff: "easy", t: "meteo" },
+  { q: "Melyik évszak a leghidegebb nálunk?", a: ["Tavasz","Nyár","Ősz","Tél"], c: 3, diff: "easy", t: "meteo" },
+  // -- A Föld --
+  { q: "Mi borítja a Föld felszínének legnagyobb részét?", a: ["Erdő","Víz","Sivatag","Jég"], c: 1, diff: "easy", t: "earth" },
+  { q: "Hogy hívjuk a hegyet, amelyből forró láva tör ki?", a: ["Vulkán","Domb","Szikla","Barlang"], c: 0, diff: "easy", t: "earth" },
+  { q: "Milyen alakú a Föld?", a: ["Lapos","Kocka","Gömb","Háromszög"], c: 2, diff: "easy", t: "earth" },
+  { q: "Minek nevezzük a Föld nagy, sós vízzel borított területeit?", a: ["Tó","Óceán","Patak","Tócsa"], c: 1, diff: "easy", t: "earth" },
+  { q: "Milyen színűnek látszik a Föld leginkább az űrből?", a: ["Piros","Zöld","Kék","Sárga"], c: 2, diff: "easy", t: "earth" },
+  { q: "Mi reng meg, amikor földrengés van?", a: ["Az ég","A talaj","A felhők","A Nap"], c: 1, diff: "easy", t: "earth" },
+  { q: "Hova folyik a folyók vize?", a: ["A hegyekbe","A tengerbe","Az égbe","A barlangba"], c: 1, diff: "easy", t: "earth" },
+  // -- Állatok --
+  { q: "Melyik állat a „dzsungel királya”?", a: ["Tigris","Oroszlán","Elefánt","Zsiráf"], c: 1, diff: "easy", t: "animal" },
+  { q: "Hány lába van egy póknak?", a: ["6","8","10","4"], c: 1, diff: "easy", t: "animal" },
+  { q: "Melyik állat él a vízben és kopoltyúval lélegzik?", a: ["Béka","Hal","Delfin","Kacsa"], c: 1, diff: "easy", t: "animal" },
+  { q: "Mi borítja a madarak testét?", a: ["Szőr","Pikkely","Toll","Páncél"], c: 2, diff: "easy", t: "animal" },
+  { q: "Melyik a legnagyobb szárazföldi állat?", a: ["Víziló","Elefánt","Orrszarvú","Zsiráf"], c: 1, diff: "easy", t: "animal" },
+  { q: "Melyik állat készít mézet?", a: ["Hangya","Méh","Lepke","Légy"], c: 1, diff: "easy", t: "animal" },
+  { q: "Hány lába van egy rovarnak?", a: ["4","6","8","10"], c: 1, diff: "easy", t: "animal" },
+  { q: "Melyik állat hordja a kicsinyét a hasán lévő erszényben?", a: ["Kenguru","Majom","Medve","Nyúl"], c: 0, diff: "easy", t: "animal" },
+  { q: "Melyik állattá alakul át az ebihal?", a: ["Hal","Béka","Gyík","Madár"], c: 1, diff: "easy", t: "animal" },
+  { q: "Melyik a leggyorsabb állat a szárazföldön?", a: ["Gepárd","Ló","Nyúl","Kutya"], c: 0, diff: "easy", t: "animal" },
+  { q: "Mit eszik szívesen a nyúl?", a: ["Húst","Sárgarépát","Halat","Mézet"], c: 1, diff: "easy", t: "animal" },
+  // -- Repülés --
+  { q: "Mi tartja a levegőben a repülőgépet?", a: ["A kereke","A szárnya","Az ablakai","A festése"], c: 1, diff: "easy", t: "fly" },
+  { q: "Hogy hívják a repülőgép vezetőjét?", a: ["Sofőr","Pilóta","Mozdonyvezető","Kapitány"], c: 1, diff: "easy", t: "fly" },
+  { q: "Honnan szállnak fel a repülőgépek?", a: ["Repülőtérről","Pályaudvarról","Kikötőből","Garázsból"], c: 0, diff: "easy", t: "fly" },
+  { q: "Melyik repülő járműnek forog a teteje (rotorja)?", a: ["Repülőgép","Helikopter","Rakéta","Léggömb"], c: 1, diff: "easy", t: "fly" },
+  { q: "Mivel emelkedik a magasba a hőlégballon?", a: ["Hideg vízzel","Meleg levegővel","Homokkal","Kővel"], c: 1, diff: "easy", t: "fly" },
+  // -- Tudomány --
+  { q: "Melyik gázt lélegezzük be, ami életben tart minket?", a: ["Szén-dioxid","Oxigén","Hélium","Füst"], c: 1, diff: "easy", t: "other" },
+  { q: "Hány érzékszervünk van?", a: ["3","5","7","10"], c: 1, diff: "easy", t: "other" },
+  { q: "Melyik testrészünkkel hallunk?", a: ["Az orrunkkal","A fülünkkel","A szemünkkel","A kezünkkel"], c: 1, diff: "easy", t: "other" },
+  { q: "Melyik szervünkkel gondolkodunk?", a: ["A szívvel","A gyomorral","Az aggyal","A tüdővel"], c: 2, diff: "easy", t: "other" },
+  { q: "Mi pumpálja a vért a testünkben?", a: ["A tüdő","A szív","A máj","A gyomor"], c: 1, diff: "easy", t: "other" },
+  { q: "Mire van szüksége a növénynek a növekedéshez?", a: ["Csak sötétségre","Vízre és napfényre","Csak kőre","Húsra"], c: 1, diff: "easy", t: "other" },
+  { q: "Mi lesz a vízből, ha nagyon lehűl és megfagy?", a: ["Gőz","Jég","Köd","Eső"], c: 1, diff: "easy", t: "other" },
+  { q: "Mi lesz a jégből, ha melegítjük?", a: ["Víz","Homok","Levegő","Tűz"], c: 0, diff: "easy", t: "other" },
+
+  // ============ KÖZEPES ============
+  // -- Csillagászat --
+  { q: "Hány holdja van a Földnek?", a: ["1","2","3","Egy sincs"], c: 0, diff: "medium", t: "astro" },
+  { q: "Melyik bolygónak vannak a leghíresebb gyűrűi?", a: ["Mars","Szaturnusz","Vénusz","Merkúr"], c: 1, diff: "medium", t: "astro" },
+  { q: "Mennyi idő alatt kerüli meg a Föld a Napot?", a: ["Egy nap","Egy hónap","Egy év","Egy hét"], c: 2, diff: "medium", t: "astro" },
+  { q: "Mi okozza a nappal és az éjszaka váltakozását?", a: ["A Föld forgása","A felhők","A szél","A Hold"], c: 0, diff: "medium", t: "astro" },
+  { q: "Melyik bolygó van a legközelebb a Naphoz?", a: ["Föld","Merkúr","Mars","Vénusz"], c: 1, diff: "medium", t: "astro" },
+  { q: "Hogy nevezzük helyesen a „hullócsillagot”?", a: ["Üstökös","Meteor","Bolygó","Galaxis"], c: 1, diff: "medium", t: "astro" },
+  { q: "Ki lépett először a Holdra?", a: ["Jurij Gagarin","Neil Armstrong","Albert Einstein","Galileo Galilei"], c: 1, diff: "medium", t: "astro" },
+  { q: "Melyik a legforróbb bolygó a Naprendszerben?", a: ["Merkúr","Vénusz","Mars","Jupiter"], c: 1, diff: "medium", t: "astro" },
+  { q: "Hogy hívják azt a jeges égitestet, amelynek hosszú csóvája van?", a: ["Üstökös","Meteor","Hold","Csillagkép"], c: 0, diff: "medium", t: "astro" },
+  { q: "Hogy hívják a galaxisunkat?", a: ["Androméda","Tejút","Orion","Naprendszer"], c: 1, diff: "medium", t: "astro" },
+  // -- Időjárás --
+  { q: "Hogy hívják a tudóst, aki az időjárást előrejelzi?", a: ["Csillagász","Meteorológus","Geológus","Biológus"], c: 1, diff: "medium", t: "meteo" },
+  { q: "Hány Celsius-fokon fagy meg a víz?", a: ["0 °C","10 °C","32 °C","100 °C"], c: 0, diff: "medium", t: "meteo" },
+  { q: "Hány Celsius-fokon forr a víz?", a: ["50 °C","100 °C","200 °C","1000 °C"], c: 1, diff: "medium", t: "meteo" },
+  { q: "Mi az a forgó, tölcsér alakú, nagyon erős szél?", a: ["Tornádó","Szellő","Pára","Harmat"], c: 0, diff: "medium", t: "meteo" },
+  { q: "Milyen műszerrel mérjük a hőmérsékletet?", a: ["Vonalzóval","Hőmérővel","Mérleggel","Órával"], c: 1, diff: "medium", t: "meteo" },
+  { q: "Hogyan keletkezik a szivárvány?", a: ["A napfény megtörik az esőcseppekben","A felhők összeütköznek","A szél festi az eget","A Hold világítja meg"], c: 0, diff: "medium", t: "meteo" },
+  { q: "Mi keletkezik, amikor a vízpára a magasban apró cseppekké hűl?", a: ["Felhő","Szél","Villám","Hó"], c: 0, diff: "medium", t: "meteo" },
+  { q: "Mi a közös neve az esőnek, a hónak és a jégesőnek?", a: ["Csapadék","Pára","Szellő","Harmat"], c: 0, diff: "medium", t: "meteo" },
+  { q: "Mi az a sűrű pára, ami a talaj közelében rontja a látást?", a: ["Köd","Felhő","Füst","Harmat"], c: 0, diff: "medium", t: "meteo" },
+  // -- A Föld --
+  { q: "Hány kontinens van a Földön?", a: ["5","6","7","8"], c: 2, diff: "medium", t: "earth" },
+  { q: "Melyik a legnagyobb óceán?", a: ["Atlanti-óceán","Csendes-óceán","Indiai-óceán","Jeges-tenger"], c: 1, diff: "medium", t: "earth" },
+  { q: "Mi a Föld legmagasabb hegye?", a: ["Mont Blanc","Mount Everest","K2","Kilimandzsáró"], c: 1, diff: "medium", t: "earth" },
+  { q: "Mi a forró, folyékony anyag neve, ami a vulkánból kitör?", a: ["Láva","Víz","Jég","Homok"], c: 0, diff: "medium", t: "earth" },
+  { q: "Mi okozza a földrengést?", a: ["A kőzetlemezek mozgása","Az eső","A szél","A Hold"], c: 0, diff: "medium", t: "earth" },
+  { q: "Melyik a legnagyobb forró sivatag a Földön?", a: ["Góbi","Szahara","Kalahári","Atacama"], c: 1, diff: "medium", t: "earth" },
+  { q: "Hogy hívják a föld alatti olvadt kőzetet?", a: ["Magma","Homok","Olaj","Jég"], c: 0, diff: "medium", t: "earth" },
+  { q: "A Föld felszínének kb. hány százalékát borítja víz?", a: ["20%","50%","70%","95%"], c: 2, diff: "medium", t: "earth" },
+  // -- Állatok --
+  { q: "Melyik a legnagyobb állat a Földön?", a: ["Elefánt","Kék bálna","Cápa","Zsiráf"], c: 1, diff: "medium", t: "animal" },
+  { q: "Melyik állatcsoportba tartozik az ember?", a: ["Hüllők","Madarak","Emlősök","Halak"], c: 2, diff: "medium", t: "animal" },
+  { q: "Melyik állat tudja megváltoztatni a bőre színét?", a: ["Kaméleon","Béka","Papagáj","Teknős"], c: 0, diff: "medium", t: "animal" },
+  { q: "Melyik nagy madár nem tud repülni, de nagyon gyorsan fut?", a: ["Sas","Strucc","Bagoly","Gólya"], c: 1, diff: "medium", t: "animal" },
+  { q: "Mit csinálnak télen a medvék?", a: ["Vándorolnak","Téli álmot alszanak","Fészket raknak","Vedlenek"], c: 1, diff: "medium", t: "animal" },
+  { q: "Melyik állatcsoportba tartozik a kígyó és a gyík?", a: ["Emlősök","Hüllők","Kétéltűek","Madarak"], c: 1, diff: "medium", t: "animal" },
+  { q: "Mivel tájékozódik a denevér a sötétben?", a: ["Szaglással","Hanggal","Tapintással","Ízleléssel"], c: 1, diff: "medium", t: "animal" },
+  { q: "Hány szíve van a polipnak?", a: ["1","2","3","8"], c: 2, diff: "medium", t: "animal" },
+  { q: "Melyik rovarrá alakul át a hernyó?", a: ["Légy","Méh","Pillangó","Szúnyog"], c: 2, diff: "medium", t: "animal" },
+  // -- Repülés --
+  { q: "Kik építették az első sikeres motoros repülőgépet?", a: ["A Wright fivérek","Leonardo da Vinci","Thomas Edison","A Montgolfier fivérek"], c: 0, diff: "medium", t: "fly" },
+  { q: "Mivel hajtják a modern utasszállító repülőket?", a: ["Gőzgéppel","Sugárhajtóművel","Pedállal","Vitorlával"], c: 1, diff: "medium", t: "fly" },
+  { q: "Melyik jármű tud egy helyben lebegni a levegőben?", a: ["Repülőgép","Helikopter","Vitorlázógép","Rakéta"], c: 1, diff: "medium", t: "fly" },
+  { q: "Miért emelkedik fel a hőlégballon?", a: ["A meleg levegő könnyebb a hidegnél","Mert nagyon nehéz","A szél fújja fel","Mágnes húzza fel"], c: 0, diff: "medium", t: "fly" },
+  { q: "Mi a „fekete doboz” feladata a repülőgépen?", a: ["Zenét játszik","Rögzíti a repülés adatait","Világít a sötétben","Hűti a gépet"], c: 1, diff: "medium", t: "fly" },
+  // -- Tudomány --
+  { q: "Mi a víz kémiai jele (képlete)?", a: ["CO2","O2","H2O","NaCl"], c: 2, diff: "medium", t: "other" },
+  { q: "Mi a növények zöld színanyaga?", a: ["Klorofill","Vitamin","Cukor","Méz"], c: 0, diff: "medium", t: "other" },
+  { q: "Milyen gázt adnak nekünk a növények, amit belélegzünk?", a: ["Szén-dioxidot","Oxigént","Hidrogént","Füstöt"], c: 1, diff: "medium", t: "other" },
+  { q: "Melyik szervünkkel lélegzünk?", a: ["A szívvel","A tüdővel","A májjal","A gyomorral"], c: 1, diff: "medium", t: "other" },
+  { q: "Mi húz minden tárgyat a Föld felé?", a: ["A mágnes","A gravitáció","A szél","A fény"], c: 1, diff: "medium", t: "other" },
+  { q: "Mi a leggyorsabb a világon?", a: ["A hang","A fény","A szél","A rakéta"], c: 1, diff: "medium", t: "other" },
+  { q: "Melyik vitamint kapjuk a napfénytől?", a: ["C-vitamin","D-vitamin","A-vitamin","B-vitamin"], c: 1, diff: "medium", t: "other" },
+  { q: "Hány csont van kb. egy felnőtt ember testében?", a: ["106","206","306","500"], c: 1, diff: "medium", t: "other" },
+
+  // ============ NEHÉZ ============
+  // -- Csillagászat --
+  { q: "Melyik égitestet sorolták át törpebolygóvá 2006-ban?", a: ["Mars","Plútó","Vénusz","Merkúr"], c: 1, diff: "hard", t: "astro" },
+  { q: "Körülbelül mennyi idő alatt ér a Nap fénye a Földre?", a: ["8 perc","1 óra","1 nap","Azonnal"], c: 0, diff: "hard", t: "astro" },
+  { q: "Hogy hívják azt az égitestet, amelyből még a fény sem tud kiszökni?", a: ["Fehér törpe","Fekete lyuk","Üstökös","Galaxis"], c: 1, diff: "hard", t: "astro" },
+  { q: "Mit jelent a fényév?", a: ["Egy év a Napon","Egy nagyon fényes év","A távolság, amit a fény egy év alatt megtesz","A Nap kora"], c: 2, diff: "hard", t: "astro" },
+  { q: "Mi okozza a napfogyatkozást?", a: ["A Hold a Nap elé kerül","Eső takarja el a Napot","A Nap egy időre kialszik","Sűrű felhők jönnek"], c: 0, diff: "hard", t: "astro" },
+  { q: "Melyik bolygón van a Naprendszer legnagyobb vihara, a Nagy Vörös Folt?", a: ["Mars","Jupiter","Szaturnusz","Föld"], c: 1, diff: "hard", t: "astro" },
+  { q: "Körülbelül milyen gyors a fény?", a: ["300 km/óra","300 000 km/másodperc","1000 km/másodperc","Végtelen gyors"], c: 1, diff: "hard", t: "astro" },
+  // -- Időjárás --
+  { q: "Milyen műszerrel mérik a légnyomást?", a: ["Barométer","Hőmérő","Iránytű","Mérleg"], c: 0, diff: "hard", t: "meteo" },
+  { q: "Melyik felhőből esik leginkább zivatar és villámlás?", a: ["Pehelyfelhő","Zivatarfelhő (gomolyfelhő)","Fátyolfelhő","Köd"], c: 1, diff: "hard", t: "meteo" },
+  { q: "Mi a víz körforgásának három fő lépése?", a: ["Párolgás, lecsapódás, csapadék","Fagyás, olvadás, forrás","Eső, hó, szél","Reggel, dél, este"], c: 0, diff: "hard", t: "meteo" },
+  { q: "Melyik légköri réteg véd meg a Nap káros sugaraitól?", a: ["Ózonréteg","Felhőréteg","Hóréteg","Vízréteg"], c: 0, diff: "hard", t: "meteo" },
+  { q: "Mi okozza a villámot?", a: ["Elektromos kisülés a felhőkben","A Nap fénye","A szél súrlódása","Becsapódó meteorok"], c: 0, diff: "hard", t: "meteo" },
+  { q: "Mit mér a Beaufort-skála?", a: ["A hőmérsékletet","A szél erősségét","Az eső mennyiségét","A napsütést"], c: 1, diff: "hard", t: "meteo" },
+  // -- A Föld --
+  { q: "Hány fő rétegből áll a Föld?", a: ["2","3","5","10"], c: 1, diff: "hard", t: "earth" },
+  { q: "Hogy hívják a Föld legkülső, szilárd rétegét?", a: ["Földköpeny","Földkéreg","Földmag","Légkör"], c: 1, diff: "hard", t: "earth" },
+  { q: "Hogy hívják a hatalmas táblákat, amelyekből a Föld kérge áll?", a: ["Kőzetlemezek","Jégtáblák","Homokdűnék","Korallzátonyok"], c: 0, diff: "hard", t: "earth" },
+  { q: "Mi méri a földrengés erősségét?", a: ["Richter-skála","Celsius-skála","Beaufort-skála","Méterrúd"], c: 0, diff: "hard", t: "earth" },
+  { q: "Körülbelül milyen idős a Föld?", a: ["1 millió év","4,5 milliárd év","100 ezer év","6000 év"], c: 1, diff: "hard", t: "earth" },
+  { q: "Mi a Föld legmélyebb pontja az óceánban?", a: ["Mariana-árok","Bermuda-háromszög","Vörös-tenger","Holt-tenger"], c: 0, diff: "hard", t: "earth" },
+  { q: "Mi a kövület (fosszília)?", a: ["Egy fajta drágakő","Ősi élőlények kővé vált maradványa","Vulkáni hamu","Egy csillagfajta"], c: 1, diff: "hard", t: "earth" },
+  // -- Állatok --
+  { q: "Hány üregből áll az ember szíve?", a: ["2","3","4","5"], c: 2, diff: "hard", t: "animal" },
+  { q: "Hogy hívják azt a folyamatot, amikor a hernyóból pillangó lesz?", a: ["Fotoszintézis","Átalakulás (metamorfózis)","Párolgás","Költözés"], c: 1, diff: "hard", t: "animal" },
+  { q: "Melyik kihalt ragadozó dinoszaurusz volt híres az óriási fogairól?", a: ["Brachiosaurus","Tyrannosaurus Rex","Triceratops","Stegosaurus"], c: 1, diff: "hard", t: "animal" },
+  { q: "A madarak és az emlősök melegvérűek vagy hidegvérűek?", a: ["Melegvérűek","Hidegvérűek","Néha az egyik, néha a másik","Egyiknek sincs vére"], c: 0, diff: "hard", t: "animal" },
+  { q: "Melyik rovar képes a saját testsúlyának sokszorosát elcipelni?", a: ["Hangya","Szúnyog","Légy","Lepke"], c: 0, diff: "hard", t: "animal" },
+  { q: "Mit jelent, hogy egy állat ragadozó?", a: ["Csak növényt eszik","Más állatokra vadászik","Egész nap alszik","Csak vízben él"], c: 1, diff: "hard", t: "animal" },
+  // -- Repülés --
+  { q: "Melyik utasszállító repülőgép tudott a hangnál gyorsabban repülni?", a: ["Boeing 747","Concorde","Airbus A380","Cessna"], c: 1, diff: "hard", t: "fly" },
+  { q: "Ki volt az első ember az űrben?", a: ["Neil Armstrong","Jurij Gagarin","Buzz Aldrin","Christopher Columbus"], c: 1, diff: "hard", t: "fly" },
+  { q: "A repülés négy alapereje közül melyik hat felfelé?", a: ["Gravitáció","Felhajtóerő","Légellenállás","Tolóerő"], c: 1, diff: "hard", t: "fly" },
+  { q: "Mit jelent, hogy egy gép szuperszonikus?", a: ["Nagyon magasra repül","Gyorsabb a hangnál","Nagyon nagy méretű","Pilóta nélküli"], c: 1, diff: "hard", t: "fly" },
+  // -- Tudomány --
+  { q: "Mi a legkeményebb természetes anyag a Földön?", a: ["Vas","Gyémánt","Arany","Gránit"], c: 1, diff: "hard", t: "other" },
+  { q: "Mi a fotoszintézis?", a: ["A növény napfényből készít tápanyagot és oxigént","Az állatok téli alvása","A víz megfagyása","A szél keletkezése"], c: 0, diff: "hard", t: "other" },
+  { q: "Mi az anyag három fő halmazállapota?", a: ["Szilárd, folyékony, légnemű","Meleg, hideg, langyos","Kicsi, közepes, nagy","Kemény, puha, ragacsos"], c: 0, diff: "hard", t: "other" },
+  { q: "Hogy hívják a mágnes két végét?", a: ["Bal és jobb pólus","Északi és déli pólus","Felső és alsó pólus","Meleg és hideg pólus"], c: 1, diff: "hard", t: "other" },
+  { q: "Mi a hang valójában?", a: ["Egy fajta fény","Rezgés, ami terjed a levegőben","Egy láthatatlan gáz","Egy folyadék"], c: 1, diff: "hard", t: "other" },
+  { q: "Melyik a legnagyobb szervünk?", a: ["A szív","A bőr","A máj","Az agy"], c: 1, diff: "hard", t: "other" },
+  { q: "Honnan nyeri a Nap a hatalmas energiáját?", a: ["Égő fából, mint egy tábortűz","Magfúzióból","Elektromos áramból","A bolygóktól"], c: 1, diff: "hard", t: "other" }
+];
+
+// Prize sequence
+const PRIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+const PRIZE_EMOJI = "⭐";
+
+let state = {};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickQuestions() {
+  const easy   = shuffle(ALL_QUESTIONS.filter(q => q.diff === "easy")).slice(0, 4);
+  const medium = shuffle(ALL_QUESTIONS.filter(q => q.diff === "medium")).slice(0, 3);
+  const hard   = shuffle(ALL_QUESTIONS.filter(q => q.diff === "hard")).slice(0, 3);
+  return [...easy, ...medium, ...hard];
+}
+
+function startGame() {
+  state = {
+    questions: pickQuestions(),
+    current: 0,
+    lives: 3,
+    stars: 0,
+    streak: 0,
+    active: true
+  };
+  showScreen("gameScreen");
+  renderQuestion();
+}
+
+function restartGame() {
+  document.getElementById("confettiArea").innerHTML = "";
+  startGame();
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function renderLives() {
+  for (let i = 1; i <= 3; i++) {
+    const h = document.getElementById("h" + i);
+    h.classList.toggle("lost", i > state.lives);
+  }
+}
+
+function renderPrizeRow() {
+  const row = document.getElementById("prizeRow");
+  row.innerHTML = "";
+  for (let i = 0; i < 10; i++) {
+    const span = document.createElement("span");
+    span.className = "prize-gem";
+    if (i < state.current) span.classList.add("earned");
+    if (i === state.current) span.classList.add("active");
+    span.title = PRIZES[i] + " ⭐";
+    span.textContent = PRIZE_EMOJI;
+    row.appendChild(span);
+  }
+}
+
+function renderQuestion() {
+  const q = state.questions[state.current];
+  const num = state.current + 1;
+
+  document.getElementById("qLabel").textContent = num + "/10";
+  document.getElementById("progressFill").style.width = (num * 10) + "%";
+
+  renderLives();
+  renderPrizeRow();
+
+  // Difficulty badge
+  const badge = document.getElementById("diffBadge");
+  badge.className = "diff-badge";
+  if (q.diff === "easy")   { badge.classList.add("diff-easy");   badge.textContent = "⭐ KÖNNYŰ"; }
+  if (q.diff === "medium") { badge.classList.add("diff-medium"); badge.textContent = "⭐⭐ KÖZEPES"; }
+  if (q.diff === "hard")   { badge.classList.add("diff-hard");   badge.textContent = "⭐⭐⭐ NEHÉZ"; }
+
+  // Topic badge
+  const topic = TOPICS[q.t];
+  const tb = document.getElementById("topicBadge");
+  tb.innerHTML = `<span class="t-emoji">${topic.icon}</span><span>${topic.name}</span>`;
+
+  document.getElementById("questionNum").textContent = num + ". KÉRDÉS";
+  document.getElementById("questionText").textContent = q.q;
+
+  // Shuffle answers
+  const letters = ["A","B","C","D"];
+  const cls = ["ans-a","ans-b","ans-c","ans-d"];
+  const indices = shuffle([0,1,2,3]);
+  const answerOrder = indices.map(i => ({ text: q.a[i], original: i }));
+
+  const container = document.getElementById("answersContainer");
+  container.innerHTML = "";
+  answerOrder.forEach((ans, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "answer-btn " + cls[idx];
+    btn.innerHTML = `<span class="letter">${letters[idx]}</span><span>${ans.text}</span>`;
+    btn.dataset.original = ans.original;
+    btn.onclick = () => handleAnswer(btn, ans.original === q.c, q.c);
+    container.appendChild(btn);
+  });
+
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("funfact").textContent = "";
+  document.getElementById("streakMsg").textContent = "";
+  document.getElementById("nextBtn").classList.remove("visible");
+}
+
+function handleAnswer(btn, isCorrect, correctOriginal) {
+  if (!state.active) return;
+  document.querySelectorAll(".answer-btn").forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    btn.classList.add("correct");
+    state.stars = PRIZES[state.current];
+    state.streak++;
+    const feedback = document.getElementById("feedback");
+    feedback.className = "feedback correct";
+    const msgs = ["🎉 HELYES! Remek!","✅ IGEN! Szuper vagy!","⭐ BRAVÓ! Okos vagy!","🌟 WOW! Tökéletes!","⚡ IGEN! Zseniális!"];
+    feedback.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    if (state.streak >= 3) {
+      document.getElementById("streakMsg").textContent = "🔥 " + state.streak + " helyes válasz egymás után! Ragyogsz!";
+    }
+    setTimeout(() => {
+      const gems = document.querySelectorAll(".prize-gem");
+      if (gems[state.current]) {
+        gems[state.current].classList.remove("active");
+        gems[state.current].classList.add("earned");
+      }
+    }, 400);
+  } else {
+    btn.classList.add("wrong");
+    state.lives--;
+    state.streak = 0;
+    document.querySelectorAll(".answer-btn").forEach(b => {
+      if (parseInt(b.dataset.original) === correctOriginal) b.classList.add("correct");
+    });
+    const feedback = document.getElementById("feedback");
+    feedback.className = "feedback wrong";
+    const msgs = ["😅 Sajnos nem jó...","💔 Nem ez volt!","🙈 Majdnem! Legközelebb sikerül!","😬 Hoppá! De semmi gond!"];
+    feedback.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    renderLives();
+    if (state.lives <= 0) {
+      setTimeout(() => endGame(false), 1300);
+      return;
+    }
+  }
+
+  document.getElementById("nextBtn").classList.add("visible");
+
+  if (state.current === 9 && isCorrect) {
+    setTimeout(() => endGame(true), 1400);
+  }
+}
+
+function nextQuestion() {
+  state.current++;
+  if (state.current >= 10) {
+    endGame(state.stars === PRIZES[9]);
+    return;
+  }
+  renderQuestion();
+}
+
+function endGame(won) {
+  showScreen("endScreen");
+  const d = state.stars;
+  let title, praise;
+
+  if (d === 0) {
+    title = "🌧️ BORULT NAP!";
+    praise = "Ne csüggedj! Minden nagy tudós tévedett már. Próbáld újra, és ragyogni fogsz! 💪";
+  } else if (d <= 4) {
+    title = "🌱 SZÉP KEZDÉS!";
+    praise = "Ügyes voltál! Már igazi kis felfedező vagy. Gyakorolj még, és profi leszel! 🔎";
+  } else if (d <= 32) {
+    title = "⭐ ÜGYES KUTATÓ!";
+    praise = "Nagyon jól ment! Egyre okosabb vagy. Büszke lehetsz magadra! 🌟";
+  } else if (d <= 128) {
+    title = "🚀 SZUPER TUDÓS!";
+    praise = "Hihetetlen teljesítmény! Igazi természetbúvár vagy! A barátaid is csodálni fognak! 🏆";
+  } else if (d === 512) {
+    title = "👑 NAGY FELFEDEZŐ!";
+    praise = "TÖKÉLETES! Te vagy a legokosabb kis tudós! Még Einstein is büszke lenne rád! 🎉⚡";
+  } else {
+    title = "🔥 FANTASZTIKUS!";
+    praise = "Remekül teljesítettél! Igazi tudós vagy! ⭐🔬";
+  }
+
+  document.getElementById("resultTitle").textContent = title;
+  document.getElementById("starCount").textContent = d + " csillag összegyűjtve!";
+  document.getElementById("praiseText").textContent = praise;
+
+  const dd = document.getElementById("starDisplay");
+  if (d === 0) dd.textContent = "🌧️";
+  else if (d <= 8) dd.textContent = "⭐";
+  else if (d <= 64) dd.textContent = "⭐⭐";
+  else dd.textContent = "⭐⭐⭐";
+
+  if (d > 0) launchConfetti();
+}
+
+// =================== VISUALS ===================
+function makeStars() {
+  const c = document.getElementById("stars");
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement("div");
+    s.className = "star";
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*65}%;
+      animation-delay:${Math.random()*3}s;
+      animation-duration:${1.5+Math.random()*2}s;
+    `;
+    c.appendChild(s);
+  }
+}
+
+const FLOAT_ICONS = ["⚡","🪐","☁️","🌍","🦋","✈️","⭐","🌧️","🔬","🌈","🚀","🌙","☄️","🍃","🐝","🔭","🧪","❄️","🌪️","🌟"];
+function makeFloatingIcons() {
+  const c = document.getElementById("floatingIcons");
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement("div");
+    b.className = "float-icon";
+    b.textContent = FLOAT_ICONS[Math.floor(Math.random() * FLOAT_ICONS.length)];
+    b.style.cssText = `
+      left:${Math.random()*100}%;
+      font-size:${20+Math.random()*22}px;
+      animation-duration:${10+Math.random()*14}s;
+      animation-delay:${Math.random()*-18}s;
+    `;
+    c.appendChild(b);
+  }
+}
+
+function triggerLightning() {
+  const flash = document.getElementById("flash");
+  const bolt = document.getElementById("bolt");
+  const x = 12 + Math.random() * 76;
+  flash.style.setProperty("--fx", x + "%");
+  bolt.style.left = x + "%";
+  flash.classList.remove("on"); bolt.classList.remove("on");
+  void flash.offsetWidth; // reflow to restart animation
+  flash.classList.add("on"); bolt.classList.add("on");
+  setTimeout(() => { flash.classList.remove("on"); bolt.classList.remove("on"); }, 750);
+  scheduleLightning();
+}
+function scheduleLightning() {
+  setTimeout(triggerLightning, 5000 + Math.random() * 9000);
+}
+
+function launchConfetti() {
+  const area = document.getElementById("confettiArea");
+  const colors = ["#4AECF5","#FFE15D","#5ED66B","#FF6B6B","#6C5CE7","#FF914D","#FFD700","#4A90E2"];
+  for (let i = 0; i < 90; i++) {
+    setTimeout(() => {
+      const conf = document.createElement("div");
+      conf.className = "conf";
+      conf.style.cssText = `
+        left:${Math.random()*100}%;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        width:${6+Math.random()*10}px;
+        height:${6+Math.random()*10}px;
+        border-radius:${Math.random()>0.5?"50%":"2px"};
+        animation-duration:${2+Math.random()*2}s;
+        animation-delay:${Math.random()*1}s;
+      `;
+      area.appendChild(conf);
+      setTimeout(() => conf.remove(), 4000);
+    }, i * 40);
+  }
+}
+
+// Init
+makeStars();
+makeFloatingIcons();
+scheduleLightning();
+setTimeout(triggerLightning, 1500);
+</script>
+</body>
+</html>
